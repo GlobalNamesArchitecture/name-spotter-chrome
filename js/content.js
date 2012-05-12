@@ -142,14 +142,14 @@ $(function() {
   };
 
   ns.saveSettings = function() {
-    var self = this, data = $('#'+this.n+'-settings-form').serializeJSON();
+    var self = this, message = { tab : self.tab, data : $('#'+this.n+'-settings-form').serializeJSON() };
 
     self.showMessage('saved');
     $.each(['-config', '-names-selections'], function(){
       $('#' + self.n + this).fadeOut(3000);
     });
     $('#'+self.n+'-settings').fadeOut(3000, function(){
-      chrome.extension.sendRequest({ method : "ns_saveSettings", params : data });
+      chrome.extension.sendRequest({ method : "ns_saveSettings", params : message });
     });
   };
 
@@ -373,7 +373,7 @@ $(function() {
         break;
 
         case 'ns_highlight':
-          if(request.params && request.params.total > 0 && self.tab.id !== undefined) {
+          if(request.params && request.params.total > 0 && self.tab.id !== undefined && $('#'+self.n+'-toolbox').length === 0) {
             self.response = request.params;
             try {
               self.highlight();

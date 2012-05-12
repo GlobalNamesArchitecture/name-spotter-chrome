@@ -221,7 +221,8 @@ $(function() {
 
         case 'ns_saveSettings':
           localStorage.removeItem("namespotter");
-          localStorage.namespotter = JSON.stringify(request.params);
+          localStorage.namespotter = JSON.stringify(request.params.data);
+          delete self.total[request.params.tab.id];
           self.loadSettings();
           self.sendRequest();
           sendResponse({"message" : "success"});
