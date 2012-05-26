@@ -202,6 +202,7 @@ $(function() {
 
         case 'ns_clipBoard':
           if(request.params.names.length > 0) {
+            names = [];
             $.each(request.params.names, function() {
               names.push(this.value);
             });

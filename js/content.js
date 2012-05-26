@@ -15,7 +15,52 @@
 
   $.extend($.expr[':'],{
     containsExactCase: function(a,i,m){
+      i = null;
       return $.trim(a.innerHTML) === unescape(m[3]);
+    },
+    scrollable: function (element, index, meta) {
+      var rootrx = /^(?:html)$/i,
+          converter = {
+            vertical: { x: false, y: true },
+            horizontal: { x: true, y: false },
+            both: { x: true, y: true },
+            x: { x: true, y: false },
+            y: { x: false, y: true }
+          },
+          scrollValue = {
+            auto: true,
+            scroll: true,
+            visible: false,
+            hidden: false
+          },
+          direction = converter[typeof (meta[3]) === "string" && meta[3].toLowerCase()] || converter.both,
+          styles    = (document.defaultView && document.defaultView.getComputedStyle ? document.defaultView.getComputedStyle(element, null) : element.currentStyle),
+          overflow  = {
+            x: scrollValue[styles.overflowX.toLowerCase()] || false,
+            y: scrollValue[styles.overflowY.toLowerCase()] || false,
+            isRoot: rootrx.test(element.nodeName)
+          },
+          size = {};
+
+      if (!overflow.x && !overflow.y && !overflow.isRoot) { return false; }
+
+      size = {
+          height: {
+            scroll: element.scrollHeight,
+            client: element.clientHeight
+          },
+          width: {
+            scroll: element.scrollWidth,
+            client: element.clientWidth
+          },
+          scrollableX: function () {
+            return (overflow.x || overflow.isRoot) && this.width.scroll > this.width.client;
+          },
+          scrollableY: function () {
+            return (overflow.y || overflow.isRoot) && this.height.scroll > this.height.client;
+          }
+      };
+      return (direction.y && size.scrollableY()) || (direction.x && size.scrollableX());
     }
   });
 
@@ -31,7 +76,7 @@ $(function() {
     tab         : {},
     settings    : {},
     response    : { names : [] },
-    scrub       : ['select', 'input', 'textearea', 'script', 'style', 'noscript', 'img']
+    scrub       : ['select', 'input', 'textearea', 'script', 'style', 'noscript', 'img', 'iframe']
   };
 
   ns.compareStringLengths = function(a, b) {
@@ -238,16 +283,17 @@ $(function() {
     });
 
     $('#' + self.n + '-names-selections select').change(function() {
-      var selected    = $('option:selected', this).val(),
+      var selected_val = $('option:selected', this).val(),
           current     = 0,
-          occurrences = $("." + self.n + "-highlight:containsExactCase('" + escape(selected) + "')");
+          occurrences = $("." + self.n + "-highlight:containsExactCase('" + escape(selected_val) + "')"),
+          scroller = occurrences.eq(current).closest(":scrollable");
 
       $("." + self.n + "-highlight").removeClass(self.n + "-selected");
-
-      $('body').scrollTo(occurrences.eq(current).addClass(self.n + "-selected"), 0, { offset:-50 });
+      scroller = (scroller.length > 0) ? scroller : $('body');
+      scroller.scrollTo(occurrences.eq(current).addClass(self.n + "-selected"), 0, { offset : -50 });
 
       $.each(['up', 'down'], function() {
-        var _self = this, offset = { offset : -25 };
+        var _self = this, offset = { offset : -50 };
         $('.' + self.n + '-arrow-' + _self).unbind('click').click(function(e) {
           e.preventDefault();
           if(_self === 'up') {
@@ -261,7 +307,9 @@ $(function() {
             }
           }
           $("." + self.n + "-highlight").removeClass(self.n + "-selected");
-          $('body').scrollTo(occurrences.eq(current).addClass(self.n + "-selected"), 0, offset);
+          scroller = occurrences.eq(current).closest(":scrollable");
+          scroller = (scroller.length > 0) ? scroller : $('body');
+          scroller.scrollTo(occurrences.eq(current).addClass(self.n + "-selected"), 0, offset);
         });
       });
       
@@ -309,13 +357,13 @@ $(function() {
     } else {
       body = $('body').clone();
       $.each(self.scrub, function() {
-        body.find(this).remove();
+        $(this, body).remove();
       });
       $.each($('td', body), function() {
         cell = $(this).html();
         $(this).html(" " + cell);
       });
-      message.data.input  = body.text().replace(/\s+/g, " ");
+      message.data.text  = body.text().replace(/\s+/g, " ");
     }
 
     if(engine) { message.data.engine = engine; }

@@ -27,8 +27,8 @@ a.namespotter-select-copy{background:url('chrome-extension://__MSG_@@extension_i
 #namespotter-names-panel-actions{top:-31px;right:0px;}
 #namespotter-names-selections{top:-39px;left:0px;height:20px;padding:3px 5px 0px;text-align:left;}
 
-#namespotter-names-selections select{}
-#namespotter-arrows{padding:0px;margin:0px;width:30px;height:15px;display:inline-block;}
+#namespotter-names-selections select, #namespotter-names-selections option{padding:0px;margin:0px;font-size:12px;font-weight:normal;height:12px;line-height:12px;}
+#namespotter-arrows{padding:0px;margin:0px;width:30px;height:12px;line-height:12px;display:inline-block;}
 .namespotter-arrow-up{background:url('chrome-extension://__MSG_@@extension_id__/images/bullet_arrow_up.png') no-repeat center center;}
 .namespotter-arrow-down{background:url('chrome-extension://__MSG_@@extension_id__/images/bullet_arrow_down.png') no-repeat center center;}
 .namespotter-arrow-up:hover{background:url('chrome-extension://__MSG_@@extension_id__/images/bullet_arrow_up.png') no-repeat center center, -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(21%,#f3f3f3), color-stop(78%,#ededed), color-stop(100%,#ffffff));}
