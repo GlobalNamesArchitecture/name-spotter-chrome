@@ -111,25 +111,12 @@ $(function() {
     var img = new Image(),
         c   = $('#canvas')[0].getContext('2d');
 
-    switch(type) {
-      case 'default':
-        img.src = this.manifest.icons['19'];
-        img.onload = function() {
-          c.clearRect(0, 0, 19, 15);
-          c.drawImage(img, 0, 0, 19, 15);
-          chrome.browserAction.setIcon({ imageData : c.getImageData(0, 0, 19, 15), tabId : tab.id });
-        };
-      break;
-
-      case 'gray':
-        img.src = this.manifest.icons.gray;
-        img.onload = function() {
-          c.clearRect(0, 0, 19, 15);
-          c.drawImage(img, 0, 0, 19, 15);
-          chrome.browserAction.setIcon({ imageData : c.getImageData(0, 0, 19, 15), tabId : tab.id });
-        };
-      break;
-    }
+    img.src = (type === 'gray') ? this.manifest.icons.gray : this.manifest.icons['19'];
+    img.onload = function() {
+      c.clearRect(0, 0, 19, 15);
+      c.drawImage(img, 0, 0, 19, 15);
+      chrome.browserAction.setIcon({ imageData : c.getImageData(0, 0, 19, 15), tabId : tab.id });
+    };
   };
 
   nsbg.sendRequest = function() {
