@@ -78,6 +78,7 @@ $(function() {
     tab         : {},
     settings    : {},
     response    : { names : [] },
+    scientific  : [],
     scrub       : ['select', 'input', 'textearea', 'script', 'style', 'noscript', 'img', 'iframe']
   };
 
@@ -87,19 +88,8 @@ $(function() {
     return 0;
   };
 
-  ns.verbatim = function(sort) {
-    var verbatim = [];
-
-    $.each(this.response.names, function() {
-      if($.inArray(this.verbatim, verbatim) === -1) { verbatim.push(this.verbatim); }
-    });
-
-    if(sort) { return verbatim.sort(this.compareStringLengths); }
-    return verbatim.sort();
-  };
-
   ns.highlight = function() {
-    $('body').highlight(this.verbatim(true), { className : this.n+'-highlight', wordsOnly : true });
+    $('body').highlight(this.scientific.sort(this.compareStringLengths), { className : this.n+'-highlight', wordsOnly : true });
   };
 
   ns.unhighlight = function() {
@@ -200,34 +190,32 @@ $(function() {
     });
   };
 
-  ns.makeSelectList = function() {
+  ns.buildNames = function() {
+    var self = this;
+
+    $.each(this.response.names, function() {
+      if($.inArray(this.scientificName, self.scientific) === -1) { self.scientific.push(this.scientificName.replace(/[\[\]]/g,"")); }
+    });
+  };
+
+  ns.addNames = function() {
     var self        = this,
-        occurrences = 0,
+        scientific  = this.scientific.sort(),
+        list        = "",
+        encoded     = "",
+        occurrences = "",
         markup      = "",
         options     = "";
 
-    $.each(this.verbatim(), function() {
+    $.each(scientific, function() {
+      encoded = encodeURIComponent(this);
+      list += '<li><input type="checkbox" id="ns-' + encoded + '" name="names[' + encoded + ']" value="' + this + '"><label for="ns-' + encoded + '">' + this + '</label></li>';
       occurrences = $("." + self.n + "-highlight:containsExactCase('" + escape(this) + "')").length;
       markup = (occurrences > 1) ? " (" + occurrences + ")" : "";
       options += '<option value="' + this + '">' + this + markup + '</option>';
     });
-
+    $('#' + self.n + '-names-list ul').html("").append(list);
     $('#' + self.n + '-names-selections select').append(options);
-  };
-
-  ns.addNames = function() {
-    var self = this, list = "", encoded = "", name = "", scientific = [];
-
-    $.each(self.response.names, function() {
-      name = this.scientificName.replace(/[\[\]]/gi,"");
-      if($.inArray(name, scientific) === -1) { scientific.push(name); }
-    });
-
-    $.each(scientific.sort(), function() {
-      encoded = encodeURIComponent(this);
-      list += '<li><input type="checkbox" id="ns-' + encoded + '" name="names[' + encoded + ']" value="' + this + '"><label for="ns-' + encoded + '">' + this + '</label></li>';
-    });
-    $('#'+self.n+'-names-list ul').html("").append(list);
   };
 
   ns.showMessage = function(key) {
@@ -426,10 +414,10 @@ $(function() {
           if(request.params && request.params.total > 0 && self.tab.id !== undefined && $('#'+self.n+'-toolbox').length === 0) {
             self.response = request.params;
             try {
+              self.buildNames()
               self.highlight();
               self.makeToolBox();
               self.addNames();
-              self.makeSelectList();
               self.activateSelectList();
               self.activateButtons();
               self.i18n();
