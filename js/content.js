@@ -414,7 +414,7 @@ $(function() {
           if(request.params && request.params.total > 0 && self.tab.id !== undefined && $('#'+self.n+'-toolbox').length === 0) {
             self.response = request.params;
             try {
-              self.buildNames()
+              self.buildNames();
               self.highlight();
               self.makeToolBox();
               self.addNames();

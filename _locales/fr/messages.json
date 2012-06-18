@@ -8,6 +8,9 @@
   "content_warning" : {
     "message" : "Les noms scientifiques ne peuvent pas être trouvées sur cette page"
   },
+  "content_security" : {
+    "message" : "Pour des raisons de sécurité des extensions Chrome ne peut pas exécuter les scripts contenus dans cette page."
+  },
   "error" : {
     "message" : "Il y avait un problème avec NameSpotter ou vous avez perdu votre connexion Internet"
   },

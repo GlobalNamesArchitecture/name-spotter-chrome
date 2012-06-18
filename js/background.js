@@ -236,7 +236,14 @@ $(function() {
   nsbg.init = function() {
     var self = this;
 
-    chrome.browserAction.onClicked.addListener(function() {
+    chrome.browserAction.onClicked.addListener(function(tab) {
+      if (!tab.url.indexOf('https://chrome.google.com/') ||
+          !tab.url.indexOf('chrome://') ||
+          !tab.url.indexOf('about:') ||
+          !tab.url.indexOf('chrome-extension://')) {
+          alert(chrome.i18n.getMessage("content_security"));
+          return;
+      }
       self.cleanup();
       self.loadManifest();
       self.loadAnalytics();
