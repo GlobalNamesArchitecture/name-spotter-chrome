@@ -333,7 +333,7 @@ $(function() {
     var self    = this,
         engine  = (self.settings && self.settings.engine) ? self.settings.engine : null,
         url     = self.tab.url,
-        message = { tab : self.tab, data : { unique : true  } },
+        message = { tab : self.tab, data : { unique : true, verbatim : false  } },
         ext     = url.split('.').pop().toLowerCase(),
         body    = "",
         cell    = "";
