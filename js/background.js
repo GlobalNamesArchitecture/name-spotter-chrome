@@ -135,22 +135,6 @@ $(function() {
     });
   };
 
-  nsbg.selectionClick = function(info, tab) {
-    tab = null;
-
-    alert(info.selectionText);
-  };
-
-  nsbg.addContextMenu = function() {
-    var self = this;
-
-    chrome.contextMenus.create({
-      "title"    : chrome.i18n.getMessage("context_menu"),
-      "contexts" : ["selection"],
-      "onclick"  : self.selectionClick
-    });
-  };
-
   nsbg.receiveRequests = function() {
     var self = this, names = [];
 
@@ -169,7 +153,6 @@ $(function() {
             success  : function(response) {
               if(response.total > 0) {
                 chrome.tabs.sendRequest(request.params.tab.id, { method : "ns_highlight", params : response });
-                self.addContextMenu();
               } else {
                 self.total[request.params.tab.id] = 0;
                 self.setBadge(request.params.tab, '0', 'red');
