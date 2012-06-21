@@ -198,9 +198,26 @@ $(function() {
     });
   };
 
+  ns.occurrences = function(string, subString, allowOverlapping){
+    var n    = 0,
+        pos  = 0,
+        step = (allowOverlapping) ? (1) : (subString.length);
+
+    string += ""; subString += "";
+
+    if(subString.length<=0) { return string.length+1; }
+
+    while(true){
+      pos = string.indexOf(subString, pos);
+      if(pos >= 0) { n += 1; pos += step; } else { break; }
+    }
+    return(n);
+  };
+
   ns.addNames = function() {
     var self        = this,
         scientific  = this.scientific.sort(),
+        all_names   = $("." + self.n + "-highlight").text(),
         list        = "",
         encoded     = "",
         occurrences = "",
@@ -210,10 +227,11 @@ $(function() {
     $.each(scientific, function() {
       encoded = encodeURIComponent(this);
       list += '<li><input type="checkbox" id="ns-' + encoded + '" name="names[' + encoded + ']" value="' + this + '"><label for="ns-' + encoded + '">' + this + '</label></li>';
-      occurrences = $("." + self.n + "-highlight:containsExactCase('" + escape(this) + "')").length;
+      occurrences = self.occurrences(all_names, this);
       markup = (occurrences > 1) ? " (" + occurrences + ")" : "";
       options += '<option value="' + this + '">' + this + markup + '</option>';
     });
+
     $('#' + self.n + '-names-list ul').html("").append(list);
     $('#' + self.n + '-names-selections select').append(options);
   };
@@ -283,9 +301,10 @@ $(function() {
       scroller.scrollTo(occurrences.eq(current).addClass(self.n + "-selected"), 0, { offset : -50 });
 
       $.each(['up', 'down'], function() {
-        var inner_self = this, offset = { offset : -50 };
+        var inner_self = this, current_element = "", offset = { offset : -50 };
         $('.' + self.n + '-arrow-' + inner_self).unbind('click').click(function(e) {
           e.preventDefault();
+          $("." + self.n + "-highlight").removeClass(self.n + "-selected");	
           if(inner_self === 'up') {
             current -= 1;
             if(current < 0) { current = 0; }
@@ -296,10 +315,11 @@ $(function() {
               offset = {};
             }
           }
-          $("." + self.n + "-highlight").removeClass(self.n + "-selected");
-          scroller = occurrences.eq(current).closest(":scrollable");
+          current_element = occurrences.eq(current);
+          scroller = current_element.closest(":scrollable");
           scroller = (scroller.length > 0) ? scroller : $('body');
-          scroller.scrollTo(occurrences.eq(current).addClass(self.n + "-selected"), 0, offset);
+          current_element.addClass(self.n + "-selected");
+          scroller.scrollTo(current_element, 0, offset);
         });
       });
       
