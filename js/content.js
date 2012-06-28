@@ -127,7 +127,7 @@ $(function() {
         if(item === 'close') {
           $('#'+self.n+'-toolbox').remove();
           self.unhighlight();
-          chrome.extension.sendRequest({ method : "ns_closed", tab : self.tab });
+          chrome.extension.sendRequest({ method : "ns_closed", params : { tab : self.tab } });
         }
       });
     });

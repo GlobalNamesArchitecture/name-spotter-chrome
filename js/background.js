@@ -217,7 +217,7 @@ $(function() {
         break;
 
         case 'ns_closed':
-          self.resetBadgeIcon(request.tab);
+          self.resetBadgeIcon(request.params.tab);
           sendResponse({"message" : "success"});
         break;
 
