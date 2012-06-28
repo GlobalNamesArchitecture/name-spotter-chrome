@@ -1,4 +1,4 @@
-/*global $, jQuery, window, document, self, chrome, localStorage, Image */
+/*global $, jQuery, window, document, self, chrome, localStorage, Image, alert */
 
 var nsbg = nsbg || {},
     _gaq = _gaq || [];
@@ -135,39 +135,57 @@ $(function() {
     });
   };
 
+  nsbg.sendGNRDRequest = function(request, req_ws, req_type, req_data) {
+    var self = this;
+
+    $.ajax({
+      type     : req_type,
+      data     : req_data || "",
+      dataType : 'json',
+      url      : req_ws,
+      success  : function(response) {
+        if(response.status.toString() === "102") {
+          window.setTimeout(function() {
+            self.sendGNRDRequest(request, response.token_url, "GET");
+          }, 1000);
+        } else if (response.status.toString() === "200") {
+          if(response.total > 0) {
+            chrome.tabs.sendRequest(request.params.tab.id, { method : "ns_highlight", params : response });
+          } else {
+            self.total[request.params.tab.id] = 0;
+            self.setBadge(request.params.tab, '0', 'red');
+          }
+        } else {
+          self.total[request.params.tab.id] = 0;
+          self.setBadge(request.params.tab, chrome.i18n.getMessage('failed'), 'red');
+        }
+      },
+      error : function() {
+        self.total[request.params.tab.id] = 0;
+        self.setBadge(request.params.tab, chrome.i18n.getMessage('failed'), 'red');
+      }
+    });
+  };
+
   nsbg.receiveRequests = function() {
     var self = this, names = [];
 
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+      var total    = "",
+          category = request.params.category || "",
+          action   = request.params.action || "",
+          label    = request.params.label || "";
+
       sender = null;
 
       switch(request.method) {
         case 'ns_content':
           sendResponse({"message" : "success"});
           self.resetBadgeIcon(request.params.tab);
-          $.ajax({
-            type     : "POST",
-            data     : request.params.data,
-            dataType : 'json',
-            url      : self.manifest.namespotter.ws,
-            success  : function(response) {
-              if(response.total > 0) {
-                chrome.tabs.sendRequest(request.params.tab.id, { method : "ns_highlight", params : response });
-              } else {
-                self.total[request.params.tab.id] = 0;
-                self.setBadge(request.params.tab, '0', 'red');
-              }
-            },
-            error : function() {
-              self.total[request.params.tab.id] = 0;
-              self.setBadge(request.params.tab, chrome.i18n.getMessage('failed'), 'red');
-            }
-          });
+          self.sendGNRDRequest(request, self.manifest.namespotter.ws, "POST", request.params.data);
         break;
 
         case 'ns_complete':
-          var total = "";
-
           if(!request.params.total) {
             self.total[request.params.tab.id] = 0;
             self.setBadge(request.params.tab, total, 'red');
@@ -179,10 +197,6 @@ $(function() {
         break;
 
         case 'ns_analytics':
-          var category = request.params.category || "",
-              action   = request.params.action || "",
-              label    = request.params.label || "";
-
           self.analytics(category, action, label);
           sendResponse({"message" : "success"});
         break;
@@ -233,14 +247,21 @@ $(function() {
     this.manifest = {};
   };
 
+  nsbg.checkURL = function(url) {
+    if(url.indexOf('https://chrome.google.com/') !== -1 ||
+       url.indexOf('chrome://') !== -1 ||
+       url.indexOf('about:') !== -1 ||
+       url.indexOf('chrome-extension://') !== -1) {
+      return true;
+    }
+    return false;
+  };
+
   nsbg.init = function() {
     var self = this;
 
     chrome.browserAction.onClicked.addListener(function(tab) {
-      if (!tab.url.indexOf('https://chrome.google.com/') ||
-          !tab.url.indexOf('chrome://') ||
-          !tab.url.indexOf('about:') ||
-          !tab.url.indexOf('chrome-extension://')) {
+      if (self.checkURL(tab.url)) {
           alert(chrome.i18n.getMessage("content_security"));
           return;
       }
