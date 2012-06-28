@@ -144,7 +144,7 @@ $(function() {
       dataType : 'json',
       url      : req_ws,
       success  : function(response) {
-        if(response.status.toString() === "102") {
+        if(response.status.toString() === "303") {
           window.setTimeout(function() {
             self.sendGNRDRequest(request, response.token_url, "GET");
           }, 1000);
