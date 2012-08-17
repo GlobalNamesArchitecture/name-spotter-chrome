@@ -1,8 +1,12 @@
 {
   "name"            : "Global Names NameSpotter",
-  "version"         : "0.5.6",
+  "version"         : "0.6.0",
+  "minimum_chrome_version" : "18"
+  "manifest_version": 2,
   "description"     : "__MSG_manifest_description__",
-  "background_page" : "background.html",
+  "background"      : {
+    "page" : "background.html"
+  },
   "icons" : {
     "19"     : "images/icon-19.png",
     "48"     : "images/icon-48.png",
@@ -14,11 +18,12 @@
     "193"    : "images/icon-19-3.png"
   },
   "default_locale" : "en",
-  "browser_action": {
+  "browser_action" : {
     "default_title" : "__MSG_manifest_title__",
     "default_icon"  : "images/icon-19.png"
   },
   "permissions": ["tabs", "<all_urls>", "background", "clipboardWrite"],
+  "offline_enabled": false,
   "content_security_policy" : "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
   "content_scripts": [
     {
@@ -32,12 +37,35 @@
         "js/jquery.resizer.min.js",
         "js/jquery.scrollTo.min.js",
         "js/content.js"
-      ],
-      "run_at" : "document_end"
+      ]
     }
   ],
-  "namespotter" : {
-    "ws" : "http://gnrd.globalnames.org/name_finder.json",
-    "ga" : "UA-29483410-1"
-  }
+  "web_accessible_resources" : [
+    "toolbox.html",
+    "images/accept.png",
+    "images/ajax-loader.gif",
+    "images/bullet_arrow_down.png",
+    "images/bullet_arrow_up.png",
+    "images/bullet_green.png",
+    "images/bullet_green_hover.png",
+    "images/bullet_red.png",
+    "images/bullet_red_hover.png",
+    "images/bullet_yellow.png",
+    "images/bullet_yellow_hover.png",
+    "images/cancel.png",
+    "images/cog.png",
+    "images/disk.png",
+    "images/error.png",
+    "images/grippie.png",
+    "images/icon-128.png",
+    "images/icon-19-1.png",
+    "images/icon-19-2.png",
+    "images/icon-19-3.png",
+    "images/icon-19-gray.png",
+    "images/icon-19.png",
+    "images/icon-48.png",
+    "images/page_white_paste.png",
+    "images/tick.png",
+    "images/user_comment.png"
+  ]
 }

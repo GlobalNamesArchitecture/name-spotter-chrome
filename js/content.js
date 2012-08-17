@@ -127,7 +127,7 @@ $(function() {
         if(item === 'close') {
           $('#'+self.n+'-toolbox').remove();
           self.unhighlight();
-          chrome.extension.sendRequest({ method : "ns_closed", params : { tab : self.tab } });
+          chrome.extension.sendMessage({ method : "ns_closed", params : { tab : self.tab } });
         }
       });
     });
@@ -151,17 +151,17 @@ $(function() {
   };
 
   ns.makeToolBox = function() {
-    var toolbox = '';
+    var self = this, toolbox = "";
 
     $.ajax({
-      type     : "GET",
-      async    : false,
-      url      : chrome.extension.getURL("/toolbox.html"),
-      dataType : 'html',
-      success  : function(response) {
-        toolbox = response;
+      type  : "GET",
+      async : false,
+      url   : chrome.extension.getURL('/toolbox.html'),
+      success : function(data) {
+        toolbox = data;
       }
     });
+
     $('body').append(toolbox);
     this.activateToolBox();
   };
@@ -186,7 +186,7 @@ $(function() {
       $('#' + self.n + this).fadeOut(3000);
     });
     $('#'+self.n+'-settings').fadeOut(3000, function(){
-      chrome.extension.sendRequest({ method : "ns_saveSettings", params : message });
+      chrome.extension.sendMessage({ method : "ns_saveSettings", params : message });
     });
   };
 
@@ -261,7 +261,7 @@ $(function() {
         }
         if(action === 'copy') {
           data = { names: $('#'+self.n+'-names-form').serializeArray() };
-          chrome.extension.sendRequest({ method : "ns_clipBoard", params : data }, function(response) {
+          chrome.extension.sendMessage({ method : "ns_clipBoard", params : data }, function(response) {
             if(response.message && response.message === "success") { self.showMessage('copied'); }
           });
         }
@@ -329,7 +329,7 @@ $(function() {
   ns.analytics = function(category, action, label) {
     var data = { category : category, action : action, label : label };
 
-    chrome.extension.sendRequest({ method : "ns_analytics", params : data });
+    chrome.extension.sendMessage({ method : "ns_analytics", params : data });
   };
 
   ns.getParameterByName = function(name) {
@@ -346,7 +346,7 @@ $(function() {
     var message = { tab : this.tab, total : total || null };
 
     this.active = false;
-    chrome.extension.sendRequest({ method : "ns_complete", params : message });
+    chrome.extension.sendMessage({ method : "ns_complete", params : message });
   };
 
   ns.sendPage = function() {
@@ -379,7 +379,7 @@ $(function() {
     if(engine) { message.data.engine = engine; }
 
     $('#'+self.n+'-toolbox').remove();
-    chrome.extension.sendRequest({ method : "ns_content", params : message });
+    chrome.extension.sendMessage({ method : "ns_content", params : message });
   };
 
   ns.clearvars = function() {
@@ -403,7 +403,7 @@ $(function() {
     var self = this;
 
     $(window).bind('beforeunload', function() {
-      chrome.extension.sendRequest({ method : "ns_refresh", params : { tab : self.tab }}, function(response) {
+      chrome.extension.sendMessage({ method : "ns_refresh", params : { tab : self.tab }}, function(response) {
         if(response.message === "success") {
           self.tab = {};
         }
@@ -411,10 +411,10 @@ $(function() {
     });
   };
 
-  ns.loadListener = function() {
+  ns.receiveMessages = function() {
     var self = this;
 
-    chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+    chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
       sender = null;
       switch(request.method) {
         case 'ns_initialize':
@@ -454,7 +454,7 @@ $(function() {
   };
 
   ns.init = function() {
-    this.loadListener();
+    this.receiveMessages();
   };
 
   ns.init();

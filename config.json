@@ -1,0 +1,6 @@
+{
+  "namespotter" : {
+    "ws" : "http://gnrd.globalnames.org/name_finder.json",
+    "ga" : "UA-29483410-1"
+  }
+}

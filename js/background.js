@@ -9,6 +9,7 @@ $(function() {
 
   nsbg.settings = {};
   nsbg.manifest = {};
+  nsbg.config   = {};
   nsbg.total    = {};
 
   nsbg.animateIcon = function(tab) {
@@ -59,11 +60,25 @@ $(function() {
 
   };
 
+  nsbg.loadConfig = function() {
+    var self = this, url = chrome.extension.getURL('/config.json');
+
+    $.ajax({
+      type  : "GET",
+      async : false,
+      url   : url,
+      success : function(data) {
+        self.config = $.parseJSON(data);
+      }
+    });
+
+  };
+
   nsbg.loadAnalytics = function() { 
    var ga = document.createElement('script'),
        s  = document.getElementsByTagName('script')[0];
 
-   _gaq.push(['_setAccount', this.manifest.namespotter.ga]);
+   _gaq.push(['_setAccount', this.config.namespotter.ga]);
    _gaq.push(['_trackPageview']);
    ga.type = 'text/javascript';
    ga.async = true;
@@ -119,10 +134,11 @@ $(function() {
     };
   };
 
-  nsbg.sendRequest = function() {
-    var self = this, data = {};
+  nsbg.sendMessage = function() {
+    var self = this, tab = {}, data = {};
 
-    chrome.tabs.getSelected(null, function(tab) {
+    chrome.tabs.query({active : true, currentWindow : true}, function(tab) {
+      tab = tab[0];
       if(self.total[tab.id] !== undefined || self.total[tab.id] === -1) {
         delete self.total[tab.id];
       } else {
@@ -130,7 +146,7 @@ $(function() {
         self.resetBadgeIcon(tab);
         self.animateIcon(tab);
         data = { url : tab.url, settings : self.settings, tab : tab };
-        chrome.tabs.sendRequest(tab.id, { method : "ns_initialize", params : data });
+        chrome.tabs.sendMessage(tab.id, { method : "ns_initialize", params : data });
       }
     });
   };
@@ -150,7 +166,7 @@ $(function() {
           }, 1000);
         } else if (response.status.toString() === "200") {
           if(response.total > 0) {
-            chrome.tabs.sendRequest(request.params.tab.id, { method : "ns_highlight", params : response });
+            chrome.tabs.sendMessage(request.params.tab.id, { method : "ns_highlight", params : response });
           } else {
             self.total[request.params.tab.id] = 0;
             self.setBadge(request.params.tab, '0', 'red');
@@ -167,10 +183,10 @@ $(function() {
     });
   };
 
-  nsbg.receiveRequests = function() {
+  nsbg.receiveMessages = function() {
     var self = this, names = [];
 
-    chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+    chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
       var total    = "",
           category = request.params.category || "",
           action   = request.params.action || "",
@@ -182,7 +198,7 @@ $(function() {
         case 'ns_content':
           sendResponse({"message" : "success"});
           self.resetBadgeIcon(request.params.tab);
-          self.sendGNRDRequest(request, self.manifest.namespotter.ws, "POST", request.params.data);
+          self.sendGNRDRequest(request, self.config.namespotter.ws, "POST", request.params.data);
         break;
 
         case 'ns_complete':
@@ -226,7 +242,7 @@ $(function() {
           localStorage.namespotter = JSON.stringify(request.params.data);
           delete self.total[request.params.tab.id];
           self.loadSettings();
-          self.sendRequest();
+          self.sendMessage();
           sendResponse({"message" : "success"});
         break;
 
@@ -245,6 +261,7 @@ $(function() {
   nsbg.cleanup = function() {
     this.settings = {};
     this.manifest = {};
+    this.config   = {};
   };
 
   nsbg.checkURL = function(url) {
@@ -267,12 +284,13 @@ $(function() {
       }
       self.cleanup();
       self.loadManifest();
+      self.loadConfig();
       self.loadAnalytics();
       self.loadSettings();
-      self.sendRequest();
+      self.sendMessage();
     });
 
-    self.receiveRequests();
+    self.receiveMessages();
   };
 
   nsbg.init();
