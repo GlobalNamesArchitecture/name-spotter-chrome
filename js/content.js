@@ -370,8 +370,7 @@ $(function() {
         $(this, body).remove();
       });
       $.each($('td', body), function() {
-        cell = $(this).html();
-        $(this).html(" " + cell);
+        $(this).wrap("<span>&nbsp;</span>");
       });
       message.data.text  = body.text().replace(/\s+/g, " ");
     }

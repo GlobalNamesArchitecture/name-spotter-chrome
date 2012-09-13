@@ -28,7 +28,7 @@ $(function() {
       } else if (self.total[tab.id] > 0) {
         self.setIcon(tab, 'default');
       } else if (self.total[tab.id] === -1) {
-        img.src = self.manifest.icons['19' + (counter % 4).toString()];
+        img.src = self.config.icons['19' + (counter % 4).toString()];
         img.onload = function() {
           c.clearRect(0, 0, 19, 15);
           c.drawImage(img, 0, 0, 19, 15);
@@ -126,7 +126,7 @@ $(function() {
     var img = new Image(),
         c   = $('#canvas')[0].getContext('2d');
 
-    img.src = (type === 'gray') ? this.manifest.icons.gray : this.manifest.icons['19'];
+    img.src = (type === 'gray') ? this.config.icons.gray : this.config.icons['16'];
     img.onload = function() {
       c.clearRect(0, 0, 19, 15);
       c.drawImage(img, 0, 0, 19, 15);
@@ -260,8 +260,6 @@ $(function() {
 
   nsbg.cleanup = function() {
     this.settings = {};
-    this.manifest = {};
-    this.config   = {};
   };
 
   nsbg.checkURL = function(url) {
@@ -274,7 +272,7 @@ $(function() {
     return false;
   };
 
-  nsbg.init = function() {
+  nsbg.addListener = function() {
     var self = this;
 
     chrome.browserAction.onClicked.addListener(function(tab) {
@@ -283,14 +281,17 @@ $(function() {
           return;
       }
       self.cleanup();
-      self.loadManifest();
-      self.loadConfig();
       self.loadAnalytics();
       self.loadSettings();
       self.sendMessage();
     });
+  };
 
-    self.receiveMessages();
+  nsbg.init = function() {
+    this.loadManifest();
+    this.loadConfig();
+    this.receiveMessages();
+    this.addListener();
   };
 
   nsbg.init();
