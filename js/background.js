@@ -135,7 +135,7 @@ $(function() {
   };
 
   nsbg.sendMessage = function() {
-    var self = this, tab = {}, data = {};
+    var self = this, data = {};
 
     chrome.tabs.query({active : true, currentWindow : true}, function(tab) {
       tab = tab[0];
