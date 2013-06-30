@@ -98,7 +98,7 @@ $(function() {
   
   ns.toolTips = function() {
     var self = this;
-    if(self.settings && self.settings.eol_tooltips && self.settings.eol_tooltips === 'true') {
+    if(self.settings && self.settings.eol_tooltips && self.settings.eol_tooltips === 'true' || !("eol_tooltips" in self.settings)) {
       $('span.'+this.n+'-highlight').css('cursor','pointer').tooltipster({
         content     : chrome.i18n.getMessage("loading"),
         theme       : '.tooltipster-shadow',
