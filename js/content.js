@@ -7,7 +7,6 @@
     var json = {};
 
     $.map($(this).serializeArray(), function(n, i){
-      i = null;
       json[n.name] = n.value;
     });
     return json;
@@ -15,54 +14,7 @@
 
   $.extend($.expr[':'],{
     containsExactCase: function(a,i,m){
-      i = null;
       return $.trim(a.innerHTML) === unescape(m[3]);
-    },
-    scrollable: function (element, index, meta) {
-      var rootrx = /^(?:html)$/i,
-          converter = {
-            vertical: { x: false, y: true },
-            horizontal: { x: true, y: false },
-            both: { x: true, y: true },
-            x: { x: true, y: false },
-            y: { x: false, y: true }
-          },
-          scrollValue = {
-            auto: true,
-            scroll: true,
-            visible: false,
-            hidden: false
-          },
-          direction = converter[typeof (meta[3]) === "string" && meta[3].toLowerCase()] || converter.both,
-          styles    = (document.defaultView && document.defaultView.getComputedStyle ? document.defaultView.getComputedStyle(element, null) : element.currentStyle),
-          overflow  = {
-            x: scrollValue[styles.overflowX.toLowerCase()] || false,
-            y: scrollValue[styles.overflowY.toLowerCase()] || false,
-            isRoot: rootrx.test(element.nodeName)
-          },
-          size = {};
-
-      index = null;
-
-      if (!overflow.x && !overflow.y && !overflow.isRoot) { return false; }
-
-      size = {
-          height: {
-            scroll: element.scrollHeight,
-            client: element.clientHeight
-          },
-          width: {
-            scroll: element.scrollWidth,
-            client: element.clientWidth
-          },
-          scrollableX: function () {
-            return (overflow.x || overflow.isRoot) && this.width.scroll > this.width.client;
-          },
-          scrollableY: function () {
-            return (overflow.y || overflow.isRoot) && this.height.scroll > this.height.client;
-          }
-      };
-      return (direction.y && size.scrollableY()) || (direction.x && size.scrollableX());
     }
   });
 
@@ -79,6 +31,7 @@ $(function() {
     settings    : {},
     response    : { names : [] },
     scientific  : [],
+    highlights  : [],
     scrub       : ['select', 'input', 'textearea', 'script', 'style', 'noscript', 'img', 'iframe']
   };
 
@@ -90,6 +43,7 @@ $(function() {
 
   ns.highlight = function() {
     $('body').highlight(this.scientific.sort(this.compareStringLengths), { className : this.n+'-highlight', wordsOnly : true });
+    this.highlights = $('span.'+this.n+'-highlight');
   };
 
   ns.unhighlight = function() {
@@ -98,26 +52,28 @@ $(function() {
   
   ns.toolTips = function() {
     var self = this;
-    if(self.settings && self.settings.eol_tooltips && self.settings.eol_tooltips === 'true' || !("eol_tooltips" in self.settings)) {
-      $('span.'+this.n+'-highlight').css('cursor','pointer').tooltipster({
+    if((self.settings && self.settings.eol_tooltips && self.settings.eol_tooltips === 'true') || !self.settings.hasOwnProperty("eol_tooltips")) {
+      self.highlights.css('cursor','pointer').tooltipster({
         content     : chrome.i18n.getMessage("loading"),
         theme       : '.tooltipster-shadow',
         interactive : true,
         maxWidth    : 400,
         functionBefore : function(origin, continueTooltip) {
           continueTooltip();
-          var name = encodeURIComponent(origin.text());
-          if(origin.data('ajax') !== 'cached') {
+          if(!self.similarTooltips(origin)) {
             $.ajax({
               type     : 'GET',
               dataType : 'JSON',
-              url      : 'http://eol.org/api/search/1.0.json?q='+name+'&page=1&exact=false',
+              url      : 'http://eol.org/api/search/1.0.json?q='+encodeURIComponent(origin.text())+'&page=1&exact=false',
               success: function(data) {
                 if(data.totalResults > 0) {
-                  self.getEOLMedia(origin,data.results[0].id);
+                  self.getTooltipMedia(origin,data.results[0].id);
                 } else {
-                  self.noEOLContent(origin);
+                  self.noTooltipContent(origin);
                 }
+              },
+              error: function() {
+                return;
               }
             });
           }
@@ -126,19 +82,34 @@ $(function() {
     }
   };
   
-  ns.getEOLMedia = function(origin,id) {
+  ns.similarTooltips = function(origin) {
+    var content = "", exists = false;
+    $.each(this.highlights.filter(":containsExactCase('" + escape(origin.text()) + "')"), function() {
+      if($(this).data('ajax') === 'cached') {
+        origin.tooltipster('update',$(this).data('tooltipsterContent')).data('ajax', 'cached');
+        exists = true;
+        return false;
+      }
+    });
+    return exists;
+  };
+  
+  ns.getTooltipMedia = function(origin,id) {
     var self = this;
     $.ajax({
       type     : 'GET',
       dataType : 'JSON',
       url      : 'http://eol.org/api/pages/1.0/'+id+'.json?images=1&videos=0&sounds=0&maps=0&text=1&iucn=false&subjects=overview&licenses=all&details=true&common_names=true&synonyms=false&references=false&vetted=0&cache_ttl=',
       success: function(data) {
-        origin.tooltipster('update',self.buildEOLContent(data)).data('ajax', 'cached');
+        origin.tooltipster('update',self.buildTooltipContent(data)).data('ajax', 'cached');
+      },
+      error: function() {
+        return;
       }
     });
   };
   
-  ns.buildEOLContent = function(data) {
+  ns.buildTooltipContent = function(data) {
     var self = this,
         content = "", 
         vernacular = "",
@@ -176,7 +147,7 @@ $(function() {
     return tmp.textContent || tmp.innerText;
   };
   
-  ns.noEOLContent = function(origin) {
+  ns.noTooltipContent = function(origin) {
     origin.tooltipster('update', chrome.i18n.getMessage("nothing_found")).data('ajax', 'cached');
   };
 
@@ -194,7 +165,6 @@ $(function() {
         names_el      = $('#'+self.n+'-names').resizer(),
         names_el_list = $('#'+self.n+'-names-list'),
         maxZ          = Math.max.apply(null, $.map($('body *'), function(e,n) {
-                          n = null;
                           if($(e).css('position') === 'absolute') {
                             return parseInt($(e).css('z-index'),10) || 100000;
                           }
@@ -310,7 +280,7 @@ $(function() {
   ns.addNames = function() {
     var self        = this,
         scientific  = this.scientific.sort(),
-        all_names   = $("span." + self.n + "-highlight").text(),
+        page_names  = self.highlights.text(),
         list        = "",
         encoded     = "",
         occurrences = "",
@@ -320,7 +290,7 @@ $(function() {
     $.each(scientific, function() {
       encoded = encodeURIComponent(this);
       list += '<li><input type="checkbox" id="ns-' + encoded + '" name="names[' + encoded + ']" value="' + this + '"><label for="ns-' + encoded + '">' + this + '</label></li>';
-      occurrences = self.occurrences(all_names, this);
+      occurrences = self.occurrences(page_names, this);
       markup = (occurrences > 1) ? " (" + occurrences + ")" : "";
       options += '<option value="' + this + '">' + this + markup + '</option>';
     });
@@ -378,15 +348,14 @@ $(function() {
 
   ns.activateSelectList = function() {
     var self = this,
-        arrows = $('#' + self.n + '-arrows'),
-        names = $("span." + self.n + "-highlight");
+        arrows = $('#' + self.n + '-arrows');
 
     $('#' + self.n + '-names-selections').find('select').on('change', function() {
       var selected_val = $(this).find('option:selected').val(),
           current     = 0,
-          occurrences = $("span." + self.n + "-highlight:containsExactCase('" + escape(selected_val) + "')");
+          occurrences = self.highlights.filter(":containsExactCase('" + escape(selected_val) + "')");
 
-      names.removeClass(self.n + "-selected");
+      self.highlights.removeClass(self.n + "-selected");
       self.scrollto(occurrences, current);
       
       arrows.off('click');
@@ -395,7 +364,7 @@ $(function() {
         var inner_self = this;
         arrows.on('click', 'a.' + self.n + '-arrow-' + inner_self, function(e) {
           e.preventDefault();
-          names.removeClass(self.n + "-selected");
+          self.highlights.removeClass(self.n + "-selected");
           if($('#' + self.n + '-names-selections').find('select').val() === "") { return; }
           if(inner_self === 'up') {
             current -= 1;
@@ -478,6 +447,7 @@ $(function() {
     this.settings   = {};
     this.scientific = [];
     this.response   = { names : [] };
+    this.highlights = [];
   };
 
   ns.cleanup = function() {
@@ -507,7 +477,6 @@ $(function() {
     var self = this;
 
     chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
-      sender = null;
       switch(request.method) {
         case 'ns_initialize':
           self.cleanup();
