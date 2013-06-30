@@ -21,7 +21,19 @@
     "message" : "copié à bloc-note"
   },
   "saved" : {
-    "message" : "enregistré et en train de rechargé..."
+    "message" : "enregistré et en train de rechargé"
+  },
+  "loading" : {
+    "message" : "en cours de chargement"
+  },
+  "nothing_found" : {
+    "message" : "rien trouvé"
+  },
+  "more" : {
+    "message" : "plus sur EOL"
+  },
+  "visit_eol" : {
+    "message" : "visité EOL"
   },
   "toolbox_selection" : {
     "message" : "-- trouver --"
@@ -65,8 +77,17 @@
   "toolbox_settings_engine_both" : {
     "message" : "les deux"
   },
+  "toolbox_settings_engine_language" : {
+    "message" : "Exclure NetiNeti sur des pages non-anglais"
+  },
   "toolbox_settings_engine_description" : {
     "message" : "TaxonFinder est un moteur d'un dictionnaire. Il est plus précis lorsque les noms sont connus. NetiNeti est un moteur de traitement du langage qui peuvent découvrir plus de noms, mais peut entraîner des faux positifs."
+  },
+  "toolbox_settings_eol" : {
+    "message" : "l'Encyclopédie de la Vie"
+  },
+  "toolbox_settings_eol_tooltips" : {
+    "message" : "afficher les info-bulles de l'Encyclopédie de la Vie"
   },
   "toolbox_settings_about" : {
     "message" : "à propos"

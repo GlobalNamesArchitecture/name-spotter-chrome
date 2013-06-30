@@ -1,4 +1,4 @@
-/*global $, jQuery, window, document, self, chrome, localStorage, Image, alert */
+/*global $, jQuery, window, document, self, chrome, localStorage, Image, alert, nsbg, _gaq */
 
 var nsbg = nsbg || {},
     _gaq = _gaq || [];
@@ -41,8 +41,7 @@ $(function() {
   };
 
   nsbg.loadSettings = function() {
-    var storage = localStorage.namespotter || "";
-
+    var storage = localStorage.namespotter || "{}";
     this.settings = $.parseJSON(storage);
   };
 
@@ -74,16 +73,21 @@ $(function() {
 
   };
 
-  nsbg.loadAnalytics = function() { 
-   var ga = document.createElement('script'),
-       s  = document.getElementsByTagName('script')[0];
+  nsbg.loadAnalytics = function() {
+   var ga = "", s = "";
 
-   _gaq.push(['_setAccount', this.config.namespotter.ga]);
-   _gaq.push(['_trackPageview']);
-   ga.type = 'text/javascript';
-   ga.async = true;
-   ga.src = 'https://ssl.google-analytics.com/ga.js';
-   s.parentNode.insertBefore(ga, s);
+   if (!window.hasOwnProperty('namespotter_ga')) {
+     ga = document.createElement('script');
+     s  = document.getElementsByTagName('script')[0];
+     _gaq.push(['_setAccount', this.config.namespotter.ga]);
+     _gaq.push(['_trackPageview']);
+     ga.type = 'text/javascript';
+     ga.async = 'async';
+     ga.src = 'https://ssl.google-analytics.com/ga.js';
+     s.parentNode.insertBefore(ga, s);
+     window.namespotter_ga = true;
+   }
+
   };
 
   nsbg.analytics = function(category, action, label) {

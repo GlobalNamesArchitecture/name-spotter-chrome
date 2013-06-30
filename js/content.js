@@ -95,6 +95,90 @@ $(function() {
   ns.unhighlight = function() {
     $('body').unhighlight({className: this.n+'-highlight'});
   };
+  
+  ns.toolTips = function() {
+    var self = this;
+    if(self.settings && self.settings.eol_tooltips && self.settings.eol_tooltips === 'true') {
+      $('span.'+this.n+'-highlight').css('cursor','pointer').tooltipster({
+        content     : chrome.i18n.getMessage("loading"),
+        theme       : '.tooltipster-shadow',
+        interactive : true,
+        maxWidth    : 400,
+        functionBefore : function(origin, continueTooltip) {
+          continueTooltip();
+          var name = encodeURIComponent(origin.text());
+          if(origin.data('ajax') !== 'cached') {
+            $.ajax({
+              type     : 'GET',
+              dataType : 'JSON',
+              url      : 'http://eol.org/api/search/1.0.json?q='+name+'&page=1&exact=false',
+              success: function(data) {
+                if(data.totalResults > 0) {
+                  self.getEOLMedia(origin,data.results[0].id);
+                } else {
+                  self.noEOLContent(origin);
+                }
+              }
+            });
+          }
+        }
+      });
+    }
+  };
+  
+  ns.getEOLMedia = function(origin,id) {
+    var self = this;
+    $.ajax({
+      type     : 'GET',
+      dataType : 'JSON',
+      url      : 'http://eol.org/api/pages/1.0/'+id+'.json?images=1&videos=0&sounds=0&maps=0&text=1&iucn=false&subjects=overview&licenses=all&details=true&common_names=true&synonyms=false&references=false&vetted=0&cache_ttl=',
+      success: function(data) {
+        origin.tooltipster('update',self.buildEOLContent(data)).data('ajax', 'cached');
+      }
+    });
+  };
+  
+  ns.buildEOLContent = function(data) {
+    var self = this,
+        content = "", 
+        vernacular = "",
+        image = "", 
+        text = "",
+        link = 'http://eol.org/pages/'+data.identifier+'/overview',
+        lang = window.navigator.language.split("-")[0].toLowerCase();
+    
+    content += '<h2><a href="'+link+'" target="_blank">'+data.scientificName;
+    $.each(data.vernacularNames, function() {
+      if(this.language && lang === this.language) {
+        vernacular = '<br><span>'+this.vernacularName+'</span>';
+        return;
+      }
+    });
+    content += vernacular+'</a></h2>';
+    content += '<p class="tooltipster-eol">';
+    $.each(data.dataObjects, function() {
+      if(this.dataType && this.dataType === "http://purl.org/dc/dcmitype/StillImage") {
+        image = '<a href="'+link+'" target="_blank"><img class="tooltipster-img" src="'+this.eolThumbnailURL+'" /></a>';
+      } else if (this.dataType && this.dataType === "http://purl.org/dc/dcmitype/Text") {
+        text = self.stripHTML(this.description);
+        if(text.length > 400) { text = text.substring(0,400) + "&hellip;";}
+      }
+    });
+    content += image + text;
+    content += (data.dataObjects.length > 0) ? ' (<a href="'+link+'" target="_blank">'+chrome.i18n.getMessage("more")+'</a>)' : '<a href="'+link+'" target="_blank">'+chrome.i18n.getMessage("visit_eol")+'</a>'; 
+    content += '</p>';
+    return content;
+  };
+  
+  ns.stripHTML = function(html) {
+    var tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText;
+  };
+  
+  ns.noEOLContent = function(origin) {
+    origin.tooltipster('update', chrome.i18n.getMessage("nothing_found")).data('ajax', 'cached');
+  };
 
   ns.i18n = function() {
     var self = this;
@@ -120,7 +204,7 @@ $(function() {
 
     $.each(['close', 'minimize', 'maximize'], function() {
       var item = this;
-      $('.'+self.n+'-'+item).click(function(e) {
+      $('#'+self.n+'-names-panel-actions').find('a.'+self.n+'-'+item).on('click', function(e) {
         e.preventDefault();
         if(item === 'minimize') { names_el.height('36px'); names_el_list.height('0px'); }
         if(item === 'maximize') { names_el.height('400px'); names_el_list.height('436px'); }
@@ -133,12 +217,20 @@ $(function() {
     });
 
     if(!self.settings || !self.settings.engine) {
-      $('input:radio[name="engine"][value=""]').attr('checked', true);
+      $('#'+self.n+'-engine-both').prop('checked', true);
+    }
+
+    if(!self.settings || !self.settings.eol_tooltips) {
+      $('#'+self.n+'-eol').prop('checked', true);
+    }
+
+    if(!self.settings || !self.settings.detect_language) {
+      $('#'+self.n+'-engine-language').prop('checked', true);
     }
 
     if(self.settings) {
       $.each(self.settings, function(name, value) {
-        var ele = $('form :input[name="' + name + '"]');
+        var ele = $('#'+self.n+'-settings-form').find('input[name="' + name + '"]');
         $.each(ele, function() {
           if(this.type === 'checkbox' || this.type === 'radio') {
             this.checked = (this.value === value);
@@ -151,7 +243,7 @@ $(function() {
   };
 
   ns.makeToolBox = function() {
-    var self = this, toolbox = "";
+    var toolbox = "";
 
     $.ajax({
       type  : "GET",
@@ -180,7 +272,8 @@ $(function() {
 
   ns.saveSettings = function() {
     var self = this, message = { tab : self.tab, data : $('#'+this.n+'-settings-form').serializeJSON() };
-
+    if(!$('#'+self.n+'-engine-language').prop("checked")) { message.data.detect_language = 'false'; }
+    if(!$('#'+self.n+'-eol').prop("checked")) { message.data.eol_tooltips = 'false'; }
     self.showMessage('saved');
     $.each(['-config', '-names-selections'], function(){
       $('#' + self.n + this).fadeOut(3000);
@@ -201,7 +294,7 @@ $(function() {
   ns.occurrences = function(string, subString, allowOverlapping){
     var n    = 0,
         pos  = 0,
-        step = (allowOverlapping) ? (1) : (subString.length);
+        step = allowOverlapping ? 1 : subString.length;
 
     string += ""; subString += "";
 
@@ -211,13 +304,13 @@ $(function() {
       pos = string.indexOf(subString, pos);
       if(pos >= 0) { n += 1; pos += step; } else { break; }
     }
-    return(n);
+    return n;
   };
 
   ns.addNames = function() {
     var self        = this,
         scientific  = this.scientific.sort(),
-        all_names   = $("." + self.n + "-highlight").text(),
+        all_names   = $("span." + self.n + "-highlight").text(),
         list        = "",
         encoded     = "",
         occurrences = "",
@@ -243,20 +336,23 @@ $(function() {
   };
 
   ns.activateButtons = function() {
-    var self = this, data = {}, names_list_input = $('input', '#'+self.n+'-names-list');
+    var self = this,
+        data = {},
+        names_panel = $('#'+self.n+'-names'),
+        names_list_input = $('#'+self.n+'-names-list').find('input');
 
     $.each(['all', 'none', 'copy'], function() {
       var action = this;
-      $('.' + self.n + '-select-' + action).click(function(e) {
+      names_panel.on('click', 'a.' + self.n + '-select-' + action, function(e) {
         e.preventDefault();
         if(action === 'all') {
           $.each(names_list_input, function() {
-            $(this).attr("checked", true);
+            $(this).prop("checked", true);
           });
         }
         if(action === 'none') {
           $.each(names_list_input, function() {
-            $(this).attr("checked", false);
+            $(this).prop("checked", false);
           });
         }
         if(action === 'copy') {
@@ -270,7 +366,7 @@ $(function() {
 
     $.each(['show', 'save', 'cancel'], function() {
       var action = this;
-      $('.' + self.n + '-settings-' + action).click(function(e) {
+      names_panel.on('click', 'a.' + self.n + '-settings-' + action, function(e) {
         e.preventDefault();
         if(action === 'show') { self.showSettings(); }
         if(action === 'save') { self.saveSettings(); }
@@ -281,49 +377,44 @@ $(function() {
   };
 
   ns.activateSelectList = function() {
-    var self = this;
+    var self = this,
+        arrows = $('#' + self.n + '-arrows'),
+        names = $("span." + self.n + "-highlight");
 
-    $('.' + self.n + '-arrow').click(function(e) {
-      if($('#' + self.n + '-names-selections select').val() === "") {
-        e.preventDefault();
-        return;
-      }
-    });
-
-    $('#' + self.n + '-names-selections select').change(function() {
-      var selected_val = $('option:selected', this).val(),
+    $('#' + self.n + '-names-selections').find('select').on('change', function() {
+      var selected_val = $(this).find('option:selected').val(),
           current     = 0,
-          occurrences = $("." + self.n + "-highlight:containsExactCase('" + escape(selected_val) + "')"),
-          scroller = occurrences.eq(current).closest(":scrollable");
+          occurrences = $("span." + self.n + "-highlight:containsExactCase('" + escape(selected_val) + "')");
 
-      $("." + self.n + "-highlight").removeClass(self.n + "-selected");
-      scroller = (scroller.length > 0) ? scroller : $('body');
-      scroller.scrollTo(occurrences.eq(current).addClass(self.n + "-selected"), 0, { offset : -50 });
+      names.removeClass(self.n + "-selected");
+      self.scrollto(occurrences, current);
+      
+      arrows.off('click');
 
       $.each(['up', 'down'], function() {
-        var inner_self = this, current_element = "", offset = { offset : -50 };
-        $('.' + self.n + '-arrow-' + inner_self).unbind('click').click(function(e) {
+        var inner_self = this;
+        arrows.on('click', 'a.' + self.n + '-arrow-' + inner_self, function(e) {
           e.preventDefault();
-          $("." + self.n + "-highlight").removeClass(self.n + "-selected");	
+          names.removeClass(self.n + "-selected");
+          if($('#' + self.n + '-names-selections').find('select').val() === "") { return; }
           if(inner_self === 'up') {
             current -= 1;
             if(current < 0) { current = 0; }
           } else if (inner_self === 'down') {
             current += 1;
-            if(current > occurrences.length - 1) {
-              current = occurrences.length - 1;
-              offset = {};
-            }
+            if(current > occurrences.length - 1) { current = occurrences.length - 1; }
           }
-          current_element = occurrences.eq(current);
-          scroller = current_element.closest(":scrollable");
-          scroller = (scroller.length > 0) ? scroller : $('body');
-          current_element.addClass(self.n + "-selected");
-          scroller.scrollTo(current_element, 0, offset);
+
+          self.scrollto(occurrences, current);
         });
       });
-      
+
     });
+
+  };
+  
+  ns.scrollto = function(occurrences, index) {
+    $('html, body').animate({ scrollTop: occurrences.eq(index).addClass(this.n + "-selected").offset().top-50 }, 500);
   };
 
   ns.analytics = function(category, action, label) {
@@ -352,11 +443,11 @@ $(function() {
   ns.sendPage = function() {
     var self    = this,
         engine  = (self.settings && self.settings.engine) ? self.settings.engine : null,
+        lang    = (self.settings && self.settings.detect_language) ? self.settings.detect_language : 'true',
         url     = self.tab.url,
         message = { tab : self.tab, data : { unique : true, verbatim : false  } },
         ext     = url.split('.').pop().toLowerCase(),
-        body    = "",
-        cell    = "";
+        body    = "";
 
     self.active = true;
 
@@ -367,15 +458,16 @@ $(function() {
     } else {
       body = $('body').clone();
       $.each(self.scrub, function() {
-        $(this, body).remove();
+        $(body).find(this).remove();
       });
-      $.each($('td', body), function() {
+      $.each($(body).find('td'), function() {
         $(this).wrap("<span>&nbsp;</span>");
       });
       message.data.text  = body.text().replace(/\s+/g, " ");
     }
 
     if(engine) { message.data.engine = engine; }
+    message.data.detect_language = lang;
 
     $('#'+self.n+'-toolbox').remove();
     chrome.extension.sendMessage({ method : "ns_content", params : message });
@@ -384,6 +476,7 @@ $(function() {
   ns.clearvars = function() {
     this.tab        = {};
     this.settings   = {};
+    this.scientific = [];
     this.response   = { names : [] };
   };
 
@@ -435,6 +528,7 @@ $(function() {
             try {
               self.buildNames();
               self.highlight();
+              self.toolTips();
               self.makeToolBox();
               self.addNames();
               self.activateSelectList();

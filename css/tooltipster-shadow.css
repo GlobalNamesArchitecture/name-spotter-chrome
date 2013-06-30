@@ -1,0 +1,51 @@
+.tooltipster-shadow {
+	border-radius: 5px;
+	background: #fff;
+	box-shadow: 0px 0px 14px rgba(0,0,0,0.3);
+	color: #2c2c2c;
+	border:1px solid #93A4B0;
+}
+.tooltipster-shadow .tooltipster-content {
+	font-family: 'Arial', sans-serif;
+	font-size: 14px;
+	line-height: 16px;
+	padding: 8px 10px;
+}
+.tooltipster-content a{display:inline;}
+.tooltipster-content h2{
+  font-size:12px;
+  line-height:14px;
+  padding:5px 14px;
+  margin:0px 0px 5px 0px;
+  font-weight:bold;
+  text-align:center;
+  background:#394651 url('chrome-extension://__MSG_@@extension_id__/images/eol.png') no-repeat scroll 5px center;
+  
+}
+.tooltipster-content h2 a{
+  color:#fff;
+  text-decoration:none;
+  display:block;
+  margin-left:10px;
+}
+.tooltipster-content h2 a span{
+  color:#C1D62E;
+  text-decoration:none;
+}
+.tooltipster-img{
+  width:75px !important;
+  height:auto !important;
+  float:left !important;
+  margin-right:10px !important;
+  padding:0px !important;
+  border:0 !important;
+  top:0px;
+}
+.tooltipster-content p.tooltipster-eol{
+  font-size:12px;
+  text-align:left;
+}
+.tooltipster-content p.tooltipster-eol a{
+  color:#195184;
+  text-decoration:underline;
+}
