@@ -49,9 +49,7 @@ a.namespotter-maximize:hover{background:transparent url('chrome-extension://__MS
 #namespotter-config{position:absolute;top:0px;right:0px;}
 #namespotter-config a{border:1px solid transparent;border-radius:4px;margin:0px 5px 0px 0px;padding:3px 3px 3px 22px;color:#202020;text-decoration:none;font-weight:normal;text-shadow: 1px 1px #f0f0f0;}
 
-a.namespotter-feedback{background:url('chrome-extension://__MSG_@@extension_id__/images/user_comment.png') no-repeat 3px center;}
 a.namespotter-settings-show{background:url('chrome-extension://__MSG_@@extension_id__/images/cog.png') no-repeat 3px center;}
-#namespotter-config a.namespotter-feedback:hover{background: url('chrome-extension://__MSG_@@extension_id__/images/user_comment.png') no-repeat 3px center, -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(21%,#f3f3f3), color-stop(78%,#ededed), color-stop(100%,#ffffff));border:1px solid #ccc;}
 #namespotter-config a.namespotter-settings-show:hover{background: url('chrome-extension://__MSG_@@extension_id__/images/cog.png') no-repeat 3px center, -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(21%,#f3f3f3), color-stop(78%,#ededed), color-stop(100%,#ffffff));border:1px solid #ccc;}
 
 #namespotter-names-list{width:100%;margin:5px 0px;padding:0px;text-align:left;height:100px;overflow-y:auto;}

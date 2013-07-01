@@ -83,10 +83,10 @@
   "toolbox_settings_engine_description" : {
     "message" : "TaxonFinder is a dictionary-based engine. It is more accurate when names are known. NetiNeti is a language processing engine that may discover more names, but can result in false positives."
   },
-  "toolbox_settings_eol" : {
-    "message" : "Encyclopedia of Life"
+  "toolbox_settings_tooltips" : {
+    "message" : "Tooltips"
   },
-  "toolbox_settings_eol_tooltips" : {
+  "toolbox_settings_tooltips_eol" : {
     "message" : "Show tooltips from the Encyclopedia of Life"
   },
   "toolbox_settings_about" : {

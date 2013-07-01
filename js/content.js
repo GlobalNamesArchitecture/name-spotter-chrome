@@ -28,6 +28,7 @@ $(function() {
     n           : "namespotter",
     active      : false,
     tab         : {},
+    config      : {},
     settings    : {},
     response    : { names : [] },
     scientific  : [],
@@ -52,10 +53,11 @@ $(function() {
   
   ns.toolTips = function() {
     var self = this;
+    //Note: If tooltips from other sources, refactor into a method to return theme
     if((self.settings && self.settings.eol_tooltips && self.settings.eol_tooltips === 'true') || !self.settings.hasOwnProperty("eol_tooltips")) {
       self.highlights.css('cursor','pointer').tooltipster({
         content     : chrome.i18n.getMessage("loading"),
-        theme       : '.tooltipster-shadow',
+        theme       : '.tooltipster-shadow-eol',
         interactive : true,
         maxWidth    : 400,
         functionBefore : function(origin, continueTooltip) {
@@ -64,7 +66,7 @@ $(function() {
             $.ajax({
               type     : 'GET',
               dataType : 'JSON',
-              url      : 'http://eol.org/api/search/1.0.json?q='+encodeURIComponent(origin.text())+'&page=1&exact=false',
+              url      : self.tooltipSearchURL(encodeURIComponent(origin.text())),
               success: function(data) {
                 if(data.totalResults > 0) {
                   self.getTooltipMedia(origin,data.results[0].id);
@@ -80,6 +82,11 @@ $(function() {
         }
       });
     }
+  };
+  
+  ns.tooltipSearchURL = function(search_term) {
+    //Note: If tooltips from other sources, refactor to pull URL from config
+    return this.config.tooltips.eol.api_search.uri+this.config.tooltips.eol.api_search.params+search_term;
   };
   
   ns.similarTooltips = function(origin) {
@@ -99,7 +106,7 @@ $(function() {
     $.ajax({
       type     : 'GET',
       dataType : 'JSON',
-      url      : 'http://eol.org/api/pages/1.0/'+id+'.json?images=1&videos=0&sounds=0&maps=0&text=1&iucn=false&subjects=overview&licenses=all&details=true&common_names=true&synonyms=false&references=false&vetted=0&cache_ttl=',
+      url      : self.tooltipMediaURL(id),
       success: function(data) {
         origin.tooltipster('update',self.buildTooltipContent(data)).data('ajax', 'cached');
       },
@@ -109,13 +116,20 @@ $(function() {
     });
   };
   
+  ns.tooltipMediaURL = function(id) {
+    //Note: If tooltips from other sources, refactor to pull URL from config
+    return this.config.tooltips.eol.api_pages.uri+id+".json"+this.config.tooltips.eol.api_pages.params;
+  };
+  
   ns.buildTooltipContent = function(data) {
+    //Note: Refactor if tooltip from other sources
     var self = this,
         content = "", 
         vernacular = "",
         image = "", 
         text = "",
-        link = 'http://eol.org/pages/'+data.identifier+'/overview',
+        link = this.config.tooltips.eol.pages+data.identifier,
+        klass = "",
         lang = window.navigator.language.split("-")[0].toLowerCase();
     
     content += '<h2><a href="'+link+'" target="_blank">'+data.scientificName;
@@ -136,7 +150,10 @@ $(function() {
       }
     });
     content += image + text;
-    content += (data.dataObjects.length > 0) ? ' (<a href="'+link+'" target="_blank">'+chrome.i18n.getMessage("more")+'</a>)' : '<a href="'+link+'" target="_blank">'+chrome.i18n.getMessage("visit_eol")+'</a>'; 
+    klass = (data.dataObjects.length > 0) ? 'tooltipster-eol-more' : 'tooltipster-eol-visit';
+    content += '<span class="'+klass+'"><a href="'+link+'" target="_blank">';
+    content += (data.dataObjects.length > 0) ? chrome.i18n.getMessage("more") : chrome.i18n.getMessage("visit_eol");
+    content += '</a></span>';
     content += '</p>';
     return content;
   };
@@ -191,7 +208,7 @@ $(function() {
     }
 
     if(!self.settings || !self.settings.eol_tooltips) {
-      $('#'+self.n+'-eol').prop('checked', true);
+      $('#'+self.n+'-tooltips-eol').prop('checked', true);
     }
 
     if(!self.settings || !self.settings.detect_language) {
@@ -243,7 +260,7 @@ $(function() {
   ns.saveSettings = function() {
     var self = this, message = { tab : self.tab, data : $('#'+this.n+'-settings-form').serializeJSON() };
     if(!$('#'+self.n+'-engine-language').prop("checked")) { message.data.detect_language = 'false'; }
-    if(!$('#'+self.n+'-eol').prop("checked")) { message.data.eol_tooltips = 'false'; }
+    if(!$('#'+self.n+'-tooltips-eol').prop("checked")) { message.data.eol_tooltips = 'false'; }
     self.showMessage('saved');
     $.each(['-config', '-names-selections'], function(){
       $('#' + self.n + this).fadeOut(3000);
@@ -481,6 +498,7 @@ $(function() {
         case 'ns_initialize':
           self.cleanup();
           self.tab = request.params.tab;
+          self.config = request.params.config;
           self.settings = request.params.settings;
           self.unload();
           try {

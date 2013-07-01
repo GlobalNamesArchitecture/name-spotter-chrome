@@ -12,5 +12,18 @@
     "191"    : "images/icon-19-1.png",
     "192"    : "images/icon-19-2.png",
     "193"    : "images/icon-19-3.png"
+  },
+  "tooltips" : {
+    "eol" : {
+      "api_search" : {
+        "uri"    : "http://eol.org/api/search/1.0.json",
+        "params" : "?page=1&exact=false&q="
+      },
+      "api_pages"  : {
+        "uri"    : "http://eol.org/api/pages/1.0/",
+        "params" : "?images=1&videos=0&sounds=0&maps=0&text=1&iucn=false&subjects=overview&licenses=all&details=true&common_names=true&synonyms=false&references=false&vetted=0&cache_ttl="
+      },
+      "pages" : "http://eol.org/pages/"
+    }
   }
 }

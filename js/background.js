@@ -149,7 +149,7 @@ $(function() {
         self.analytics('initialize', 'get_url', tab.url);
         self.resetBadgeIcon(tab);
         self.animateIcon(tab);
-        data = { url : tab.url, settings : self.settings, tab : tab };
+        data = { url : tab.url, config : self.config, settings : self.settings, tab : tab };
         chrome.tabs.sendMessage(tab.id, { method : "ns_initialize", params : data });
       }
     });
