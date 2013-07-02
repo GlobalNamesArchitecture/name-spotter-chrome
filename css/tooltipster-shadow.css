@@ -10,6 +10,7 @@
 	font-size: 14px;
 	line-height: 16px;
 	padding: 8px;
+	text-shadow:none !important;
 }
 .tooltipster-shadow-eol a{display:inline;}
 .tooltipster-shadow-eol h2{
@@ -22,17 +23,20 @@
   background:#394651 url('chrome-extension://__MSG_@@extension_id__/images/eol.png') no-repeat scroll 5px center;
   border-radius: 3px;
   letter-spacing:normal;
+  text-shadow:none !important;
 }
 .tooltipster-shadow-eol h2 a{
   color:#fff;
   text-decoration:none;
   display:block;
   margin-left:10px;
+  text-shadow:none !important;
 }
 .tooltipster-shadow-eol h2 a span{
   color:#C1D62E;
   text-decoration:none;
   font-size:12px;
+  text-shadow:none !important;
 }
 .tooltipster-shadow-eol img.tooltipster-img{
   width:75px !important;
@@ -47,16 +51,20 @@
 .tooltipster-shadow-eol p.tooltipster-eol{
   font-size:12px;
   text-align:left;
+  text-shadow:none !important;
 }
 .tooltipster-shadow-eol p.tooltipster-eol a{
   color:#195184;
   text-decoration:underline;
+  text-shadow:none !important;
 }
 .tooltipster-shadow-eol p.tooltipster-eol span.tooltipster-eol-more{
   display:inline;
   margin-left:3px;
+  text-shadow:none !important;
 }
 .tooltipster-shadow-eol p.tooltipster-eol span.tooltipster-eol-visit{
   display:block;
   text-align:center;
+  text-shadow:none !important;
 }
