@@ -30,8 +30,7 @@ $(function() {
     tab         : {},
     config      : {},
     settings    : {},
-    response    : { names : [] },
-    scientific  : [],
+    names       : {},
     highlights  : [],
     scrub       : ['select', 'input', 'textearea', 'script', 'style', 'noscript', 'img', 'iframe']
   };
@@ -43,7 +42,13 @@ $(function() {
   };
 
   ns.highlight = function() {
-    $('body').highlight(this.scientific.sort(this.compareStringLengths), { className : this.n+'-highlight', wordsOnly : true });
+    var self = this,
+        verbatim = Object.keys(this.names).map(function(key) {
+          return self.names[key];
+        });
+    
+    verbatim = Array.prototype.concat.apply([], verbatim).sort(this.compareStringLengths);
+    $('body').highlight(verbatim, { className : this.n+'-highlight', wordsOnly : true });
     this.highlights = $('span.'+this.n+'-highlight');
   };
 
@@ -66,7 +71,7 @@ $(function() {
             $.ajax({
               type     : 'GET',
               dataType : 'JSON',
-              url      : self.tooltipSearchURL(encodeURIComponent(origin.text())),
+              url      : self.tooltipSearchURL(encodeURIComponent(self.getScientificName(origin.text()))),
               success: function(data) {
                 if(data.totalResults > 0) {
                   self.getTooltipMedia(origin,data.results[0].id);
@@ -84,14 +89,31 @@ $(function() {
     }
   };
   
+  ns.getScientificName = function(name) {
+    var scientificName = "";
+    $.each(this.names, function(k, v) {
+      if($.inArray(name, v) !== -1) { scientificName = k; return false; }
+    });
+    return scientificName;
+  };
+  
   ns.tooltipSearchURL = function(search_term) {
     //Note: If tooltips from other sources, refactor to pull URL from config
     return this.config.tooltips.eol.api_search.uri+this.config.tooltips.eol.api_search.params+search_term;
   };
   
   ns.similarTooltips = function(origin) {
-    var content = "", exists = false;
-    $.each(this.highlights.filter(":containsExactCase('" + escape(origin.text()) + "')"), function() {
+    var self = this, name = origin.text(), occurrences = [], exists = false;
+
+    occurrences = self.highlights.filter(":containsExactCase('"+escape(name)+"')");
+    $.each(this.names, function(k, v) {
+      if($.inArray(name, v) > -1 && k !== name) {
+        occurrences = occurrences.add(self.highlights.filter(":containsExactCase('"+escape(k)+"')"));
+        return false;
+      }
+    });
+
+    $.each(occurrences, function() {
       if($(this).data('ajax') === 'cached') {
         origin.tooltipster('update',$(this).data('tooltipsterContent')).data('ajax', 'cached');
         exists = true;
@@ -270,11 +292,15 @@ $(function() {
     });
   };
 
-  ns.buildNames = function() {
+  ns.buildNames = function(names) {
     var self = this;
-
-    $.each(this.response.names, function() {
-      if($.inArray(this.scientificName, self.scientific) === -1) { self.scientific.push(this.scientificName.replace(/[\[\]]/g,"")); }
+    this.names = {};
+    $.each(names, function() {
+      if(self.names.hasOwnProperty(this.scientificName)) {
+        self.names[this.scientificName].push(this.verbatim);
+      } else {
+        self.names[this.scientificName] = [this.verbatim];
+      }
     });
   };
 
@@ -293,22 +319,38 @@ $(function() {
     }
     return n;
   };
+  
+  ns.unique = function(arr) {
+    var hash = {}, result = [];
+    for(var i = 0, l = arr.length; i < l; ++i) {
+      if (!hash.hasOwnProperty(arr[i])) {
+        hash[ arr[i] ] = true;
+        result.push(arr[i]);
+      }
+    }
+    return result;
+  };
 
   ns.addNames = function() {
     var self        = this,
-        scientific  = this.scientific.sort(),
-        page_names  = self.highlights.text(),
+        key         = "",
+        occurrences = "",
         list        = "",
         encoded     = "",
-        occurrences = "",
         markup      = "",
         options     = "";
 
-    $.each(scientific, function() {
-      encoded = encodeURIComponent(this);
+    $.each(Object.keys(this.names).sort(), function() {
+      key = this;
+      occurrences = self.highlights.filter(":containsExactCase('"+escape(key)+"')");
+      $.each(self.names[key], function() {
+        if(this !== key) {
+          occurrences = occurrences.add(self.highlights.filter(":containsExactCase('"+escape(this)+"')"));
+        }
+      });
+      encoded = encodeURIComponent(key);
       list += '<li><input type="checkbox" id="ns-' + encoded + '" name="names[' + encoded + ']" value="' + this + '"><label for="ns-' + encoded + '">' + this + '</label></li>';
-      occurrences = self.occurrences(page_names, this);
-      markup = (occurrences > 1) ? " (" + occurrences + ")" : "";
+      markup = (occurrences.length > 1) ? " (" + occurrences.length + ")" : "";
       options += '<option value="' + this + '">' + this + markup + '</option>';
     });
 
@@ -371,6 +413,12 @@ $(function() {
       var selected_val = $(this).find('option:selected').val(),
           current     = 0,
           occurrences = self.highlights.filter(":containsExactCase('" + escape(selected_val) + "')");
+
+      $.each(self.names[selected_val], function() {
+        if(selected_val !== this) {
+          occurrences = occurrences.add(self.highlights.filter(":containsExactCase('" + escape(this) + "')"));
+        }
+      });
 
       self.highlights.removeClass(self.n + "-selected");
       self.scrollto(occurrences, current);
@@ -454,6 +502,7 @@ $(function() {
 
     if(engine) { message.data.engine = engine; }
     message.data.detect_language = lang;
+    message.data.verbatim = 'true';
 
     $('#'+self.n+'-toolbox').remove();
     chrome.extension.sendMessage({ method : "ns_content", params : message });
@@ -462,9 +511,7 @@ $(function() {
   ns.clearvars = function() {
     this.tab        = {};
     this.settings   = {};
-    this.scientific = [];
-    this.response   = { names : [] };
-    this.highlights = [];
+    this.names = [];
   };
 
   ns.cleanup = function() {
@@ -509,11 +556,10 @@ $(function() {
           }
         break;
 
-        case 'ns_highlight':
+        case 'ns_names':
           if(request.params && request.params.total > 0 && self.tab.id !== undefined && $('#'+self.n+'-toolbox').length === 0) {
-            self.response = request.params;
             try {
-              self.buildNames();
+              self.buildNames(request.params.names);
               self.highlight();
               self.toolTips();
               self.makeToolBox();
@@ -521,7 +567,7 @@ $(function() {
               self.activateSelectList();
               self.activateButtons();
               self.i18n();
-              self.sendComplete(request.params.total);
+              self.sendComplete(request.params.total); //fix this because the total is wrong
             } catch(e2) {
               self.sendComplete();
               self.showWarning();

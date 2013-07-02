@@ -170,7 +170,7 @@ $(function() {
           }, 1000);
         } else if (response.status.toString() === "200") {
           if(response.total > 0) {
-            chrome.tabs.sendMessage(request.params.tab.id, { method : "ns_highlight", params : response });
+            chrome.tabs.sendMessage(request.params.tab.id, { method : "ns_names", params : response });
           } else {
             self.total[request.params.tab.id] = 0;
             self.setBadge(request.params.tab, '0', 'red');
