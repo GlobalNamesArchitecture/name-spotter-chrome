@@ -89,6 +89,9 @@
   "toolbox_settings_tooltips_eol" : {
     "message" : "afficher les info-bulles de l'Encyclopédie de la Vie"
   },
+  "toolbox_settings_tooltips_shortcut" : {
+    "message" : "Touche de raccourci: Ctrl+Maj+S (Windows) ou Commande+Maj+S (Mac) pour lancer NameSpotter sur l'onglet courant"
+  },
   "toolbox_settings_about" : {
     "message" : "À propos"
   },

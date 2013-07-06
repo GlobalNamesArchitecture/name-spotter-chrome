@@ -186,6 +186,18 @@ $(function() {
       }
     });
   };
+  
+  nsbg.receiveCommands = function() {
+    var self = this;
+    chrome.commands.onCommand.addListener(function(command) {
+      if(command === "ns_execute") {
+        self.cleanup();
+        self.loadAnalytics();
+        self.loadSettings();
+        self.sendMessage();
+      }
+    });
+  };
 
   nsbg.receiveMessages = function() {
     var self = this, names = [];
@@ -294,6 +306,7 @@ $(function() {
   nsbg.init = function() {
     this.loadManifest();
     this.loadConfig();
+    this.receiveCommands();
     this.receiveMessages();
     this.addListener();
   };

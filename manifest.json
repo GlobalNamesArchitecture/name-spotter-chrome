@@ -1,6 +1,6 @@
 {
   "name"            : "NameSpotter",
-  "version"         : "0.7.3",
+  "version"         : "0.7.4",
   "minimum_chrome_version" : "18",
   "manifest_version": 2,
   "description"     : "__MSG_manifest_description__",
@@ -37,6 +37,15 @@
       ]
     }
   ],
+  "commands": {
+    "ns_execute": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+       },
+       "description": "Execute NameSpotter"
+    }
+  },
   "web_accessible_resources" : [
     "toolbox.html",
     "images/accept.png",

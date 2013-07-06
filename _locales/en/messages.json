@@ -89,6 +89,9 @@
   "toolbox_settings_tooltips_eol" : {
     "message" : "Show tooltips from the Encyclopedia of Life"
   },
+  "toolbox_settings_tooltips_shortcut" : {
+    "message" : "Shortcut Key: Ctrl+Shift+S (Windows) or Command+Shift+S (Mac) to launch NameSpotter on the current tab"
+  },
   "toolbox_settings_about" : {
     "message" : "About"
   },
