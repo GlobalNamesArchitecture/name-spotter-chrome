@@ -1,19 +1,21 @@
 .tooltipster-shadow-eol {
-	border-radius: 5px;
-	background: #fff;
-	box-shadow: 0px 0px 14px rgba(0,0,0,0.3);
-	color: #2c2c2c;
-	border:1px solid #93A4B0;
+  font-family: 'Arial', sans-serif !important;
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: 0px 0px 14px rgba(0,0,0,0.3);
+  color: #2c2c2c;
+  border:1px solid #93A4B0;
 }
 .tooltipster-shadow-eol .tooltipster-content {
-	font-family: 'Arial', sans-serif;
-	font-size: 14px;
-	line-height: 16px;
-	padding: 8px;
-	text-shadow:none !important;
+  font-size: 14px;
+  line-height: 16px;
+  padding: 8px;
+  text-shadow:none !important;
+  text-decoration:none !important;
 }
-.tooltipster-shadow-eol a{display:inline;}
+.tooltipster-shadow-eol a{text-decoration:none !important;display:inline;}
 .tooltipster-shadow-eol h2{
+  font-family: 'Arial', sans-serif !important;
   font-size:14px;
   line-height:14px;
   padding:5px 14px;
@@ -24,17 +26,23 @@
   border-radius: 3px;
   letter-spacing:normal;
   text-shadow:none !important;
+  text-decoration:none !important;
 }
-.tooltipster-shadow-eol h2 a{
+.tooltipster-shadow-eol h2 a,
+.tooltipster-shadow-eol h2 a:active,
+.tooltipster-shadow-eol h2 a:hover,
+.tooltipster-shadow-eol h2 a:link,
+.tooltipster-shadow-eol h2 a:visited{
+  border:none !important;
   color:#fff;
-  text-decoration:none;
+  text-decoration:none !important;
   display:block;
   margin-left:10px;
   text-shadow:none !important;
 }
 .tooltipster-shadow-eol h2 a span{
   color:#C1D62E;
-  text-decoration:none;
+  text-decoration:none !important;
   font-size:12px;
   text-shadow:none !important;
 }
@@ -53,10 +61,15 @@
   text-align:left;
   text-shadow:none !important;
 }
-.tooltipster-shadow-eol p.tooltipster-eol a{
+.tooltipster-shadow-eol p.tooltipster-eol a,
+.tooltipster-shadow-eol p.tooltipster-eol a:active,
+.tooltipster-shadow-eol p.tooltipster-eol a:hover,
+.tooltipster-shadow-eol p.tooltipster-eol a:link,
+.tooltipster-shadow-eol p.tooltipster-eol a:visited{
   color:#195184;
-  text-decoration:underline;
+  text-decoration:underline !important;
   text-shadow:none !important;
+  border:none !important;
 }
 .tooltipster-shadow-eol p.tooltipster-eol span.tooltipster-eol-more{
   display:inline;
