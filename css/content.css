@@ -67,7 +67,7 @@ a.namespotter-settings-show{background:url('chrome-extension://__MSG_@@extension
 #namespotter-settings .radio-buttons{float:left;margin:0px 25px 0px 0px;padding:0px;}
 #namespotter-settings .checkboxes{margin-top:5px;}
 .namespotter-settings-description{margin-top:10px;padding:0px;}
-#namespotter-settings a{border:1px solid transparent;border-radius:4px;margin:0px 5px 0px 0px;padding:3px 3px 3px 22px;color:#202020;text-decoration:none;font-weight:normal;text-shadow: 1px 1px #f0f0f0;}
+#namespotter-settings a{border:1px solid transparent;border-radius:4px;margin:0px 5px 0px 0px;padding:3px 3px 3px 22px;color:#202020;text-decoration:none;font-weight:normal;text-shadow: 1px 1px #f0f0f0;background:none;}
 
 a.namespotter-settings-save{background:url('chrome-extension://__MSG_@@extension_id__/images/disk.png') no-repeat 3px center;}
 a.namespotter-settings-cancel{background:url('chrome-extension://__MSG_@@extension_id__/images/cancel.png') no-repeat 3px center;}
