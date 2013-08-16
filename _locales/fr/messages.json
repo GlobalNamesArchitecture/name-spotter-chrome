@@ -96,6 +96,6 @@
     "message" : "À propos"
   },
   "toolbox_settings_about_description" : {
-    "message" : "NameSpotter a été développé par David P. Shorthouse au <a href=\"http://www.mbl.edu/cli/\" target=\"_blank\">Center for Library and Informatics</a>, <a href=\"http://www.mbl.edu\" target=\"_blank\">Marine Biological Laboratory</a> pour le projet <a href=\"http://www.globalnames.org\" target=\"_blank\">Global Names</a>. Les moteurs de recherche de nom-, <a href=\"http://code.google.com/p/taxon-finder/\" target=\"_blank\">TaxonFinder</a> et <a href=\"https://github.com/mbl-cli/NetiNeti\" target=\"_blank\">NetiNeti</a> ont été mis au point par ses collègues."
+    "message" : "NameSpotter a été développé par David P. Shorthouse au <a href=\"http://www.mbl.edu\" class=\"links\" target=\"_blank\">Marine Biological Laboratory</a> pour le projet <a href=\"http://www.globalnames.org\" class=\"links\" target=\"_blank\">Global Names</a>. Les moteurs de recherche de nom-, <a href=\"http://code.google.com/p/taxon-finder/\" class=\"links\" target=\"_blank\">TaxonFinder</a> et <a href=\"https://github.com/mbl-cli/NetiNeti\" class=\"links\" target=\"_blank\">NetiNeti</a> ont été mis au point par ses collègues."
   }
 }

@@ -235,7 +235,7 @@ $(function() {
     $.ajax({
       type  : "GET",
       async : false,
-      url   : chrome.extension.getURL('/toolbox.html'),
+      url   : chrome.extension.getURL('/toolbox.html?v=' + Math.random()),
       success : function(data) {
         toolbox = data;
       }

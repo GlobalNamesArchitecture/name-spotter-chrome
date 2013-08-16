@@ -1,6 +1,6 @@
 {
   "name"            : "NameSpotter",
-  "version"         : "0.7.7",
+  "version"         : "0.7.8",
   "minimum_chrome_version" : "18",
   "manifest_version": 2,
   "description"     : "__MSG_manifest_description__",
