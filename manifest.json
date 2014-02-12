@@ -1,6 +1,6 @@
 {
   "name"            : "NameSpotter",
-  "version"         : "0.7.8",
+  "version"         : "0.7.9",
   "minimum_chrome_version" : "18",
   "manifest_version": 2,
   "description"     : "__MSG_manifest_description__",
@@ -72,6 +72,11 @@
     "images/icon-19.png",
     "images/icon-48.png",
     "images/page_white_paste.png",
-    "images/tick.png"
+    "images/tick.png",
+    "js/jquery-1.10.1.min.js",
+    "js/js/jquery.highlight.min.js",
+    "js/jquery.resizer.min.js",
+    "js/jquery.tooltipster.min.js",
+    "js/content.js"
   ]
 }
