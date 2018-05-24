@@ -1,11 +1,12 @@
 {
   "name"            : "NameSpotter",
-  "version"         : "0.8.0",
+  "version"         : "0.9.0",
   "minimum_chrome_version" : "18",
   "manifest_version": 2,
   "description"     : "__MSG_manifest_description__",
   "background"      : {
-    "page" : "background.html"
+    "page" : "background.html",
+    "persistent" : false
   },
   "icons" : {
     "16"     : "images/icon-19.png",

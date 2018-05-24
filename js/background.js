@@ -47,13 +47,13 @@ $(function() {
 
   nsbg.loadManifest = function() {
     var self = this, url = chrome.extension.getURL('/manifest.json');
-
     $.ajax({
       type  : "GET",
+      dataType: "json",
       async : false,
       url   : url,
       success : function(data) {
-        self.manifest = $.parseJSON(data);
+        self.manifest = data;
       }
     });
 
@@ -64,10 +64,11 @@ $(function() {
 
     $.ajax({
       type  : "GET",
+      dataType: "json",
       async : false,
       url   : url,
       success : function(data) {
-        self.config = $.parseJSON(data);
+        self.config = data;
       }
     });
 
